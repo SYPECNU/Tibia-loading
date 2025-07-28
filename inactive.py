@@ -8,71 +8,113 @@ import shap
 # 载入数据
 @st.cache_data
 def load_data():
-    data1 = pd.read_csv("无规律.csv", encoding='gbk')
+    data1 = pd.read_csv(r"D:\办公self\2-MTSS\MTSS-110.csv", encoding='gbk')
     data1.dropna(inplace=True)
-    data1.columns = ['Achilles tendon stress', 'Ankle plantar/dorsiflexion angle', 'Ankle in/eversion angle', 
-                     'Ankle in/external rotation angle', 'Ankle plantar/dorsiflexion moment', 'Ankle in/eversion moment', 
-                     'Ankle power', 'A/P GRF', 'M/L GRF', 'Hip flex/extension angle', 'Hip in/external rotation angle', 
-                     'Hip in/external rotation moment', 'Knee flex/extension angle', 'Knee in/external rotation angle', 
-                     'Ipsi/contralateral pelvis rotation', 'EMG activation for peroneus longus']
+    data1.columns = [
+        'Number',
+        'Target variable',
+        'Gluteus medius',
+        'Gluteus minimus',
+        'Adductor longus',
+        'Adductor brevis',
+        'Adductor magnus',
+        'Tensor fasciae latae',
+        'Gracilis',
+        'Gluteus maximus',
+        'Psoas major',
+        'Quadriceps',
+        'Piriformis',
+        'Ipsilateral erector spinae',
+        'Contralateral erector spinae',
+        'Ipsilateral internal oblique',
+        'Contralateral internal oblique',
+        'Ipsilateral external oblique',
+        'Contralateral external oblique'
+    ]
     return data1
 
 data1 = load_data()
 
 # 提取特征和标签
-X = data1[['Ankle plantar/dorsiflexion angle', 'Ankle in/eversion angle', 'Ankle in/external rotation angle', 
-           'Ankle plantar/dorsiflexion moment', 'Ankle in/eversion moment', 'Ankle power', 'A/P GRF', 'M/L GRF', 
-           'Hip flex/extension angle', 'Hip in/external rotation angle', 'Hip in/external rotation moment', 
-           'Knee flex/extension angle', 'Knee in/external rotation angle', 'Ipsi/contralateral pelvis rotation', 
-           'EMG activation for peroneus longus']]
+X = data1[[
+    'Gluteus medius',
+    'Gluteus minimus',
+    'Adductor longus',
+    'Adductor brevis',
+    'Adductor magnus',
+    'Tensor fasciae latae',
+    'Gracilis',
+    'Gluteus maximus',
+    'Psoas major',
+    'Quadriceps',
+    'Piriformis',
+    'Ipsilateral erector spinae',
+    'Contralateral erector spinae',
+    'Ipsilateral internal oblique',
+    'Contralateral internal oblique',
+    'Ipsilateral external oblique',
+    'Contralateral external oblique'
+]]
 
-y = data1[['Achilles tendon stress']]
+y = data1[['Target variable']]
 
 # 划分训练集和测试集
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # 训练XGBoost模型
-model = xgb.XGBRegressor(objective='reg:squarederror', colsample_bytree=1, min_child_weight=4, 
-                         learning_rate=0.03, n_estimators=500, subsample=0.8, max_depth=3)
+model = xgb.XGBRegressor(
+    objective='reg:squarederror',
+    colsample_bytree=1,
+    min_child_weight=3,
+    learning_rate=0.05,
+    n_estimators=500,
+    subsample=0.7,
+    max_depth=4,
+    random_state=42
+)
 model.fit(X_train, y_train)
 
 # 创建Streamlit界面
-st.title("Achilles Tendon Stress Prediction")
+st.title("Tibial Load Prediction Based on Muscle Strength")
 
 # 显示应用说明
 st.write("""
-This application is designed to predict and identify personalized risk factors related to increased Achilles tendon stress during the start running phase. 
-After entering your running posture information on the right, the model will predict your Achilles tendon stress and provide a report. 
-If your tendon stress is high, you can actively adjust your running posture to reduce the stress and prevent running injuries.
+This application is designed to predict and evaluate individual tibial load risk based on personalized lower limb and trunk muscle strength.  
+Please enter your muscle strength values on the left (in N/kg, range from -10 to 200).  
+The model will provide an estimated tibial load to support biomechanical assessment and injury prevention.
 """)
 
 # 在侧边栏中添加用户输入
 st.sidebar.header("Input Parameters")
 
 # 各种特征的输入控件
-ankle_angle = st.sidebar.slider("Ankle plantar/dorsiflexion angle", min_value=-100.0, max_value=100.0, value=0.0)
-ankle_inversion = st.sidebar.slider("Ankle in/eversion angle", min_value=-100.0, max_value=100.0, value=0.0)
-ankle_rotation_angle = st.sidebar.slider("Ankle in/external rotation angle", min_value=-100.0, max_value=100.0, value=0.0)
-ankle_moment = st.sidebar.slider("Ankle plantar/dorsiflexion moment", min_value=-20.0, max_value=20.0, value=0.5)
-ankle_inversion_moment = st.sidebar.slider("Ankle in/eversion moment", min_value=-20.0, max_value=20.0, value=0.5)
-ankle_power = st.sidebar.slider("Ankle power", min_value=-200.0, max_value=200.0, value=5.0)
-grf = st.sidebar.slider("A/P GRF", min_value=-200.0, max_value=200.0, value=50.0)
-ml_grf = st.sidebar.slider("M/L GRF", min_value=-200.0, max_value=200.0, value=50.0)
-hip_flex_angle = st.sidebar.slider("Hip flex/extension angle", min_value=-100.0, max_value=100.0, value=0.0)
-hip_rotation_angle = st.sidebar.slider("Hip in/external rotation angle", min_value=-100.0, max_value=100.0, value=0.0)
-hip_rotation_moment = st.sidebar.slider("Hip in/external rotation moment", min_value=-20.0, max_value=20.0, value=0.0)
-knee_flex_angle = st.sidebar.slider("Knee flex/extension angle", min_value=-100.0, max_value=100.0, value=0.0)
-knee_rotation_angle = st.sidebar.slider("Knee in/external rotation angle", min_value=-100.0, max_value=100.0, value=0.0)
-pelvic_rotation = st.sidebar.slider("Ipsi/contralateral pelvis rotation", min_value=-100.0, max_value=100.0, value=0.0)
-peroneus_emg = st.sidebar.slider("EMG activation for peroneus longus", min_value=0.0, max_value=1.0, value=0.5)
+gluteus_medius = st.sidebar.slider("Gluteus medius", min_value=-10.0, max_value=200.0, value=0.0)
+gluteus_minimus = st.sidebar.slider("Gluteus minimus", min_value=-10.0, max_value=200.0, value=0.0)
+adductor_longus = st.sidebar.slider("Adductor longus", min_value=-10.0, max_value=200.0, value=0.0)
+adductor_brevis = st.sidebar.slider("Adductor brevis", min_value=-10.0, max_value=200.0, value=0.0)
+adductor_magnus = st.sidebar.slider("Adductor magnus", min_value=-10.0, max_value=200.0, value=0.0)
+tensor_fasciae_latae = st.sidebar.slider("Tensor fasciae latae", min_value=-10.0, max_value=200.0, value=0.0)
+gracilis = st.sidebar.slider("Gracilis", min_value=-10.0, max_value=200.0, value=0.0)
+gluteus_maximus = st.sidebar.slider("Gluteus maximus", min_value=-10.0, max_value=200.0, value=0.0)
+psoas_major = st.sidebar.slider("Psoas major", min_value=-10.0, max_value=200.0, value=0.0)
+quadriceps = st.sidebar.slider("Quadriceps", min_value=-10.0, max_value=200.0, value=0.0)
+piriformis = st.sidebar.slider("Piriformis", min_value=-10.0, max_value=200.0, value=0.0)
+ipsi_erector_spinae = st.sidebar.slider("Ipsilateral erector spinae", min_value=-10.0, max_value=200.0, value=0.0)
+contra_erector_spinae = st.sidebar.slider("Contralateral erector spinae", min_value=-10.0, max_value=200.0, value=0.0)
+ipsi_internal_oblique = st.sidebar.slider("Ipsilateral internal oblique", min_value=-10.0, max_value=200.0, value=0.0)
+contra_internal_oblique = st.sidebar.slider("Contralateral internal oblique", min_value=-10.0, max_value=200.0, value=0.0)
+ipsi_external_oblique = st.sidebar.slider("Ipsilateral external oblique", min_value=-10.0, max_value=200.0, value=0.0)
+contra_external_oblique = st.sidebar.slider("Contralateral external oblique", min_value=-10.0, max_value=200.0, value=0.0)
 
 # 用户输入的特征值
-user_input = np.array([[ankle_angle, ankle_inversion, ankle_rotation_angle, ankle_moment, ankle_inversion_moment, 
-                        ankle_power, grf, ml_grf, hip_flex_angle, hip_rotation_angle, hip_rotation_moment, 
-                        knee_flex_angle, knee_rotation_angle, pelvic_rotation, peroneus_emg]])
+user_input = np.array([[gluteus_medius, gluteus_minimus, adductor_longus, adductor_brevis,
+                        adductor_magnus, tensor_fasciae_latae, gracilis, gluteus_maximus,
+                        psoas_major, quadriceps, piriformis, ipsi_erector_spinae,
+                        contra_erector_spinae, ipsi_internal_oblique, contra_internal_oblique,
+                        ipsi_external_oblique, contra_external_oblique]])
 
 # 预测
-predicted_stress = model.predict(user_input)
+predicted_load = model.predict(user_input)
 
 # 显示预测结果
-st.write(f"Predicted Achilles Tendon Stress: {predicted_stress[0]:.2f}")
+st.write(f"Predicted Tibial Load: {predicted_load[0]:.2f} N/kg")
