@@ -36,7 +36,8 @@ user_input = np.array([[gluteus_medius, gluteus_minimus, adductor_longus, adduct
                         ipsi_external_oblique, contra_external_oblique]])
 
 # 预测
-predicted_load = model.predict(user_input)
+user_input_df = pd.DataFrame(user_input, columns=X.columns)
+predicted_load = model.predict(user_input_df)
 
 # 显示结果
 st.write(f"Predicted Tibial Load: {predicted_load[0]:.2f} N/kg")
