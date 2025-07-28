@@ -47,7 +47,7 @@ user_input = np.array([[gluteus_medius, gluteus_minimus, adductor_longus, adduct
                         ipsi_external_oblique, contra_external_oblique]])
 
 # 预测
-user_input_df = pd.DataFrame(user_input, columns=X.columns)
+user_input_df = pd.DataFrame([input_values], columns=feature_columns)
 predicted_load = model.predict(user_input_df)
 
 # 显示结果
