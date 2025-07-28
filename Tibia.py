@@ -6,6 +6,17 @@ import joblib  # 用于加载模型
 # 加载模型
 model = joblib.load("model.pkl")
 
+# --------------------------
+# 定义特征列名
+# --------------------------
+feature_columns = [
+    'Gluteus medius', 'Gluteus minimus', 'Adductor longus', 'Adductor brevis',
+    'Adductor magnus', 'Tensor fasciae latae', 'Gracilis', 'Gluteus maximus',
+    'Psoas major', 'Quadriceps', 'Piriformis', 'Ipsilateral erector spinae',
+    'Contralateral erector spinae', 'Ipsilateral internal oblique', 'Contralateral internal oblique',
+    'Ipsilateral external oblique', 'Contralateral external oblique'
+]
+
 # 创建Streamlit界面
 st.title("Tibial Load Prediction Based on Muscle Strength")
 
