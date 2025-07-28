@@ -8,7 +8,7 @@ import shap
 # 载入数据
 @st.cache_data
 def load_data():
-    data1 = pd.read_csv(r"D:\办公self\2-MTSS\MTSS-110.csv", encoding='gbk')
+    data1 = pd.read_csv("MTSS-110.csv", encoding='gbk')  # 请确保加速.csv已经上传
     data1.dropna(inplace=True)
     data1.columns = [
         'Number',
